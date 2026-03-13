@@ -74,16 +74,35 @@ document.addEventListener('DOMContentLoaded', () => {
         questionInput.style.height = 'auto';
         resultsWrapper.classList.remove('hidden');
 
+        // Immediately scroll down so the user sees the reasoning bubble
+        setTimeout(() => {
+            resultsWrapper.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 100);
+
         // UI Loading State
         setLoading(true);
 
         // Reasoning Messages UI
         const thinkingBubble = document.createElement('div');
-        thinkingBubble.style.margin = "1rem 0";
+        thinkingBubble.className = "thinking-bubble";
+        thinkingBubble.style.margin = "1.5rem 0";
         thinkingBubble.style.padding = "1rem";
+        thinkingBubble.style.background = "rgba(138, 43, 226, 0.05)";
+        thinkingBubble.style.borderLeft = "4px solid #8a2be2";
+        thinkingBubble.style.borderRadius = "var(--radius-sm)";
         thinkingBubble.style.color = "var(--text-secondary)";
-        thinkingBubble.style.fontStyle = "italic";
-        thinkingBubble.style.opacity = "0.7";
+        thinkingBubble.style.display = "flex";
+        thinkingBubble.style.alignItems = "center";
+        thinkingBubble.style.gap = "12px";
+
+        // Use inline SVG for a nice spinner
+        thinkingBubble.innerHTML = `
+            <svg class="internal-spinner" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="animation: spin 1s linear infinite;">
+                <path d="M21 12a9 9 0 1 1-6.219-8.56"></path>
+            </svg>
+            <span class="thinking-text" style="font-style: italic;"></span>
+            <style>@keyframes spin { 100% { transform: rotate(360deg); } }</style>
+        `;
 
         const reasoningMessages = [
             "Searching Andrew's Archive...",
@@ -93,12 +112,13 @@ document.addEventListener('DOMContentLoaded', () => {
         ];
 
         let reasoningIndex = 0;
-        thinkingBubble.innerText = reasoningMessages[0];
+        const thinkingTextSpan = thinkingBubble.querySelector('.thinking-text');
+        thinkingTextSpan.innerText = reasoningMessages[0];
         answerText.appendChild(thinkingBubble);
 
         const reasoningInterval = setInterval(() => {
             reasoningIndex++;
-            thinkingBubble.innerText = reasoningMessages[reasoningIndex % reasoningMessages.length];
+            thinkingTextSpan.innerText = reasoningMessages[reasoningIndex % reasoningMessages.length];
         }, 1800);
 
         try {
@@ -156,13 +176,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             });
 
-            // Reveal Results
+            // Update generic UI state
             resultsWrapper.classList.remove('hidden');
-
-            // Smooth scroll to results
-            setTimeout(() => {
-                resultsWrapper.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }, 100);
 
         } catch (error) {
             console.error('Error:', error);
