@@ -110,7 +110,11 @@ document.addEventListener('DOMContentLoaded', () => {
             "Searching Andrew's Archive...",
             "Synthesizing NY Case Law...",
             "Evaluating Malpractice Precedents...",
-            "Formulating Legal Inference..."
+            "Formulating Legal Inference...",
+            "Verifying Citations via CourtListener...",
+            "Running Forward Citation Analysis...",
+            "Checking for Superseding Precedents...",
+            "Profiling Recent Case Developments..."
         ];
 
         let reasoningIndex = 0;
