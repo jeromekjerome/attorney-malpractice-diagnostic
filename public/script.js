@@ -166,13 +166,18 @@ document.addEventListener('DOMContentLoaded', () => {
                     a.rel = 'noopener noreferrer';
                     a.className = 'source-link';
 
-                    // Cleanup URL for display (remove https://, trailing slash)
-                    let cleanUrl = src.post_url.replace(/^https?:\/\//, '').replace(/\/$/, '');
-                    if (cleanUrl.length > 50) {
-                        cleanUrl = cleanUrl.substring(0, 47) + '...';
+                    // Use the blog post title from DB if available,
+                    // otherwise derive a readable title from the URL slug
+                    if (src.post_title) {
+                        a.textContent = src.post_title;
+                    } else {
+                        const slug = src.post_url.replace(/^https?:\/\/[^/]+\//, '').replace(/\/$/, '');
+                        const lastSegment = slug.split('/').pop() || slug;
+                        a.textContent = lastSegment
+                            .replace(/-/g, ' ')
+                            .replace(/\b\w/g, c => c.toUpperCase());
                     }
 
-                    a.textContent = cleanUrl;
                     li.appendChild(a);
                     sourcesList.appendChild(li);
                 }
