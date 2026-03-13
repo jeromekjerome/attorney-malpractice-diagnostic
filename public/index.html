@@ -45,30 +45,6 @@
                 <span class="mode-label" id="label-professor">Professor Mode</span>
             </div>
 
-            <div class="interaction-card glass-panel">
-                <form id="askForm" class="ask-form">
-                    <div class="input-group">
-                        <label for="questionInput">Describe your situation or legal question</label>
-                        <div class="textarea-wrapper">
-                            <textarea id="questionInput"
-                                placeholder="e.g., What happens if my lawyer misses the statute of limitations in New York?"
-                                rows="4" required spellcheck="true"></textarea>
-                            <div class="focus-ring"></div>
-                        </div>
-                    </div>
-                    <div class="form-actions">
-                        <button type="submit" class="primary-btn" id="submitBtn">
-                            <span class="btn-text">Analyze Case</span>
-                            <div class="spinner hidden" id="spinner">
-                                <div class="bounce1"></div>
-                                <div class="bounce2"></div>
-                                <div class="bounce3"></div>
-                            </div>
-                        </button>
-                    </div>
-                </form>
-            </div>
-
             <div id="resultsWrapper" class="results-wrapper hidden">
                 <div class="results-grid">
                     <div class="result-card glass-panel">
@@ -102,6 +78,32 @@
                     </div>
                 </div>
             </div>
+
+            <div class="interaction-card glass-panel">
+                <form id="askForm" class="ask-form">
+                    <div class="input-group">
+                        <label for="questionInput">Describe your situation or legal question</label>
+                        <div class="textarea-wrapper">
+                            <textarea id="questionInput"
+                                placeholder="e.g., What happens if my lawyer misses the statute of limitations in New York?"
+                                rows="4" required spellcheck="true"></textarea>
+                            <div class="focus-ring"></div>
+                        </div>
+                    </div>
+                    <div class="form-actions">
+                        <button type="submit" class="primary-btn" id="submitBtn">
+                            <span class="btn-text">Analyze Case</span>
+                            <div class="spinner hidden" id="spinner">
+                                <div class="bounce1"></div>
+                                <div class="bounce2"></div>
+                                <div class="bounce3"></div>
+                            </div>
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+
         </main>
     </div>
 

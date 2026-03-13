@@ -58,6 +58,8 @@ document.addEventListener('DOMContentLoaded', () => {
         // Update UI immediately with user message
         if (conversationHistory.length === 1) {
             answerText.innerHTML = '';
+            questionInput.placeholder = "Type your response or provide more details...";
+            submitBtn.querySelector('.btn-text').textContent = "Reply";
         }
 
         const userBubble = document.createElement('div');
@@ -74,9 +76,9 @@ document.addEventListener('DOMContentLoaded', () => {
         questionInput.style.height = 'auto';
         resultsWrapper.classList.remove('hidden');
 
-        // Immediately scroll down so the user sees the reasoning bubble
+        // Immediately scroll down so the user sees the reasoning bubble and input box
         setTimeout(() => {
-            resultsWrapper.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            askForm.scrollIntoView({ behavior: 'smooth', block: 'end' });
         }, 100);
 
         // UI Loading State
@@ -178,6 +180,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // Update generic UI state
             resultsWrapper.classList.remove('hidden');
+
+            // Scroll down again to keep the input box visible after the long answer renders
+            setTimeout(() => {
+                askForm.scrollIntoView({ behavior: 'smooth', block: 'end' });
+            }, 100);
 
         } catch (error) {
             console.error('Error:', error);
