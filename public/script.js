@@ -77,6 +77,30 @@ document.addEventListener('DOMContentLoaded', () => {
         // UI Loading State
         setLoading(true);
 
+        // Reasoning Messages UI
+        const thinkingBubble = document.createElement('div');
+        thinkingBubble.style.margin = "1rem 0";
+        thinkingBubble.style.padding = "1rem";
+        thinkingBubble.style.color = "var(--text-secondary)";
+        thinkingBubble.style.fontStyle = "italic";
+        thinkingBubble.style.opacity = "0.7";
+
+        const reasoningMessages = [
+            "Searching Andrew's Archive...",
+            "Synthesizing NY Case Law...",
+            "Evaluating Malpractice Precedents...",
+            "Formulating Legal Inference..."
+        ];
+
+        let reasoningIndex = 0;
+        thinkingBubble.innerText = reasoningMessages[0];
+        answerText.appendChild(thinkingBubble);
+
+        const reasoningInterval = setInterval(() => {
+            reasoningIndex++;
+            thinkingBubble.innerText = reasoningMessages[reasoningIndex % reasoningMessages.length];
+        }, 1800);
+
         try {
             const response = await fetch('/api/ask', {
                 method: 'POST',
@@ -150,6 +174,10 @@ document.addEventListener('DOMContentLoaded', () => {
             sourcesList.innerHTML = '';
             resultsWrapper.classList.remove('hidden');
         } finally {
+            clearInterval(reasoningInterval);
+            if (thinkingBubble && thinkingBubble.parentNode) {
+                thinkingBubble.parentNode.removeChild(thinkingBubble);
+            }
             setLoading(false);
         }
     });
