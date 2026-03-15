@@ -110,14 +110,16 @@ document.addEventListener('DOMContentLoaded', () => {
         `;
 
         const reasoningMessages = [
-            "Searching Andrew's Archive...",
-            "Synthesizing NY Case Law...",
-            "Evaluating Malpractice Precedents...",
-            "Formulating Legal Inference...",
-            "Verifying Citations via CourtListener...",
-            "Running Forward Citation Analysis...",
-            "Checking for Superseding Precedents...",
-            "Profiling Recent Case Developments..."
+            "Searching Andrew's 20-Year Case Archive...",
+            "Filtering for High-Authority Primary Citations...",
+            "Performing Vector Retrieval & LLM Re-ranking...",
+            "Synthesizing New York Legal Standards...",
+            "Analyzing Fact-to-Case Inference...",
+            "Cross-Referencing Citations with CourtListener...",
+            "Executing National Case Name Rescue...",
+            "Applying LLM Inference-Based Accuracy Checks...",
+            "Profiling Forward Citations for Superseding Law...",
+            "Performing Final Surgical Citation Cleanup..."
         ];
 
         let reasoningIndex = 0;
