@@ -1,24 +1,24 @@
 :root {
-    --bg-base: #0a0e17;
-    --bg-surface: rgba(22, 30, 48, 0.6);
-    --bg-surface-hover: rgba(30, 40, 60, 0.8);
-    --border-color: rgba(255, 255, 255, 0.08);
-    --border-highlight: rgba(200, 160, 80, 0.4);
+    --bg-base: #ffffff;
+    --bg-surface: #ffffff;
+    --bg-surface-hover: #f1f3f5;
+    --border-color: #e0e0e0;
+    --border-highlight: #004080; /* Navy Blue */
+    --accent-red: #B22222; /* Firebrick Red */
 
-    --text-primary: #f0f4f8;
-    --text-secondary: #9aa2b1;
-    --text-accent: #dcb360;
-    /* Gold */
+    --text-primary: #1a202c;
+    --text-secondary: #4a5568;
+    --text-accent: #004080;
+    
+    --gold-glow: rgba(0, 64, 128, 0.1);
+    --blue-glow: rgba(0, 64, 128, 0.05);
 
-    --gold-glow: rgba(220, 179, 96, 0.15);
-    --blue-glow: rgba(50, 100, 250, 0.1);
+    --radius-lg: 12px;
+    --radius-md: 8px;
+    --radius-sm: 4px;
 
-    --radius-lg: 20px;
-    --radius-md: 12px;
-    --radius-sm: 8px;
-
-    --transition-fast: 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-    --transition-normal: 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    --transition-fast: 0.2s ease;
+    --transition-normal: 0.3s ease;
 }
 
 * {
@@ -38,37 +38,9 @@ body {
     -webkit-font-smoothing: antialiased;
 }
 
-/* Background Blobs for Glassmorphism Context */
+/* Background Blobs Removed for Branded Version */
 .blob {
-    position: fixed;
-    border-radius: 50%;
-    filter: blur(120px);
-    z-index: -1;
-    pointer-events: none;
-}
-
-.blob-1 {
-    top: -10%;
-    left: -10%;
-    width: 50vw;
-    height: 50vw;
-    background: radial-gradient(circle, rgba(29, 53, 87, 1) 0%, rgba(10, 14, 23, 0) 70%);
-}
-
-.blob-2 {
-    bottom: -20%;
-    right: -10%;
-    width: 60vw;
-    height: 60vw;
-    background: radial-gradient(circle, rgba(100, 80, 40, 0.4) 0%, rgba(10, 14, 23, 0) 70%);
-}
-
-.blob-3 {
-    top: 40%;
-    left: 30%;
-    width: 30vw;
-    height: 30vw;
-    background: radial-gradient(circle, rgba(30, 50, 90, 0.5) 0%, rgba(10, 14, 23, 0) 70%);
+    display: none;
 }
 
 .layout-wrapper {
@@ -95,8 +67,8 @@ body {
 }
 
 .logo-mark {
-    background: linear-gradient(135deg, var(--text-accent), #a88242);
-    color: #000;
+    background: var(--text-accent);
+    color: #fff;
     font-family: 'Playfair Display', serif;
     font-weight: 600;
     font-size: 1.2rem;
@@ -106,7 +78,7 @@ body {
     align-items: center;
     justify-content: center;
     border-radius: var(--radius-sm);
-    box-shadow: 0 4px 15px var(--gold-glow);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 .logo-text {
@@ -142,12 +114,8 @@ body {
 }
 
 .accent-text {
-    color: var(--text-accent);
+    color: var(--accent-red);
     display: block;
-    background: -webkit-linear-gradient(0deg, #f0ecd5, var(--text-accent));
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
 }
 
 .hero-subtitle {
@@ -217,9 +185,9 @@ body {
 }
 
 input:checked+.slider {
-    background-color: #8a2be2;
-    /* Professor purple/academic */
-    border-color: #8a2be2;
+    background-color: var(--accent-red);
+    /* Professor red */
+    border-color: var(--accent-red);
 }
 
 input:checked+.slider:before {
@@ -227,41 +195,34 @@ input:checked+.slider:before {
     background-color: #fff;
 }
 
-/* Professor Mode Theme */
-body.professor-mode .blob-1 {
-    background: radial-gradient(circle, rgba(138, 43, 226, 0.4) 0%, rgba(10, 14, 23, 0) 70%);
-}
-
-body.professor-mode .blob-2 {
-    background: radial-gradient(circle, rgba(165, 42, 42, 0.4) 0%, rgba(10, 14, 23, 0) 70%);
-    /* crimson */
+/* Professor Mode Theme - Branded */
+body.professor-mode {
+    --text-accent: var(--accent-red);
 }
 
 body.professor-mode .primary-btn {
-    background: linear-gradient(135deg, #9b51e0, #8a2be2);
+    background: var(--accent-red);
 }
 
 body.professor-mode .primary-btn:hover {
-    background: linear-gradient(135deg, #a865e8, #9b51e0);
-    box-shadow: 0 6px 20px rgba(138, 43, 226, 0.4);
+    background: #8B0000; /* Darker red */
+    box-shadow: 0 4px 12px rgba(178, 34, 34, 0.3);
 }
 
 body.professor-mode .interaction-card::before {
-    background: linear-gradient(90deg, transparent, #8a2be2, transparent);
+    background: linear-gradient(90deg, transparent, var(--accent-red), transparent);
 }
 
 body.professor-mode .markdown-content a {
-    color: #a865e8;
+    color: var(--accent-red);
 }
 
-/* Glassmorphism Panels */
+/* Professional Panels */
 .glass-panel {
     background: var(--bg-surface);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
     border: 1px solid var(--border-color);
     border-radius: var(--radius-lg);
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
 }
 
 .interaction-card {
@@ -297,15 +258,9 @@ body.professor-mode .markdown-content a {
     font-size: 0.95rem;
 }
 
-.textarea-wrapper {
-    position: relative;
-    border-radius: var(--radius-md);
-    background: rgba(0, 0, 0, 0.3);
-}
-
 textarea {
     width: 100%;
-    background: transparent;
+    background: #fff;
     border: 1px solid var(--border-color);
     border-radius: var(--radius-md);
     padding: 1.2rem;
@@ -318,7 +273,7 @@ textarea {
 }
 
 textarea::placeholder {
-    color: rgba(255, 255, 255, 0.3);
+    color: #a0aec0;
 }
 
 textarea:focus {
@@ -331,8 +286,8 @@ textarea:focus {
 }
 
 .primary-btn {
-    background: linear-gradient(135deg, #cc9e40, #a88242);
-    color: #111;
+    background: var(--text-accent);
+    color: #fff;
     border: none;
     padding: 1rem 2rem;
     border-radius: var(--radius-md);
@@ -345,13 +300,13 @@ textarea:focus {
     gap: 0.8rem;
     min-width: 180px;
     transition: var(--transition-fast);
-    box-shadow: 0 4px 15px rgba(200, 160, 80, 0.2);
+    box-shadow: 0 4px 6px rgba(0, 64, 128, 0.2);
 }
 
 .primary-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(200, 160, 80, 0.4);
-    background: linear-gradient(135deg, #dcb360, #b99353);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 12px rgba(0, 64, 128, 0.3);
+    background: #003366;
 }
 
 .primary-btn:active {
@@ -472,10 +427,10 @@ textarea:focus {
 .source-link {
     display: block;
     padding: 1rem;
-    background: rgba(0, 0, 0, 0.2);
-    border: 1px solid transparent;
+    background: #f8f9fa;
+    border: 1px solid var(--border-color);
     border-radius: var(--radius-sm);
-    color: var(--text-secondary);
+    color: var(--text-accent);
     text-decoration: none;
     font-size: 0.9rem;
     transition: var(--transition-fast);
@@ -483,9 +438,9 @@ textarea:focus {
 }
 
 .source-link:hover {
-    background: rgba(200, 160, 80, 0.05);
+    background: #edf2f7;
     border-color: var(--border-highlight);
-    color: var(--text-primary);
+    color: #1a202c;
     transform: translateX(4px);
 }
 
@@ -501,7 +456,7 @@ textarea:focus {
 
 .markdown-content p {
     margin-bottom: 1.2rem;
-    color: var(--text-primary);
+    color: #2d3748;
     line-height: 1.7;
 }
 
@@ -528,7 +483,7 @@ textarea:focus {
 
 .markdown-content strong {
     font-weight: 600;
-    color: #fff;
+    color: #1a202c;
 }
 
 /* Animations */
