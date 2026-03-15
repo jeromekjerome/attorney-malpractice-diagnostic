@@ -44,6 +44,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    // Initialize UI state based on toggle
+    modeToggle.dispatchEvent(new Event('change'));
+
     // Auto-resize textarea
     questionInput.addEventListener('input', function () {
         this.style.height = 'auto';
@@ -171,7 +174,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 lastQ = lastQ.replace(/^[\s\n>*]+/, '');
                 questionLabel.textContent = lastQ;
             } else {
-                questionLabel.textContent = "Describe your situation or legal question";
+                questionLabel.textContent = currentMode === 'professor' 
+                    ? "What New York precedent or doctrine shall we examine today?" 
+                    : "Describe your situation or legal question";
             }
 
             // Render Sources
