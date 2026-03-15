@@ -179,9 +179,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     li.className = 'source-item';
 
                     const a = document.createElement('a');
-                    // Deriving a readable title first since we need titleSlug to fallback for search query
                     const segments = src.post_url.replace(/\/$/, '').split('/');
-                    // Walk backwards to find the first non-date, non-empty segment
                     let titleSlug = '';
                     for (let i = segments.length - 1; i >= 0; i--) {
                         if (segments[i] && !/^\d+$/.test(segments[i])) {
@@ -197,10 +195,29 @@ document.addEventListener('DOMContentLoaded', () => {
                     a.target = '_blank';
                     a.rel = 'noopener noreferrer';
                     a.className = 'source-link';
-
                     a.textContent = finalTitle;
-
                     li.appendChild(a);
+
+                    // Render citations found in this source
+                    if (src.citations && src.citations.length > 0) {
+                        const citeDiv = document.createElement('div');
+                        citeDiv.style.fontSize = '0.75rem';
+                        citeDiv.style.marginTop = '6px';
+                        citeDiv.style.color = 'var(--text-secondary)';
+                        citeDiv.style.opacity = '0.9';
+                        citeDiv.style.paddingLeft = '8px';
+                        citeDiv.style.borderLeft = '1px solid rgba(255,255,255,0.1)';
+                        
+                        src.citations.forEach(cit => {
+                            const citDiv = document.createElement('div');
+                            citDiv.style.marginBottom = '4px';
+                            citDiv.style.lineHeight = '1.3';
+                            citDiv.textContent = `⚖️ ${cit.replace(/\*/g, '')}`; 
+                            citeDiv.appendChild(citDiv);
+                        });
+                        li.appendChild(citeDiv);
+                    }
+
                     sourcesList.appendChild(li);
                 }
             });

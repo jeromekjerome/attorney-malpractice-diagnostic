@@ -377,7 +377,10 @@ Return a JSON object with a single key "top_indices" containing an array of inte
                 
             if (rankedChunks.length > 0) {
                 console.log(`✅ Re-ranking successful. Selected ${rankedChunks.length} chunks.`);
-                return rankedChunks;
+                return rankedChunks.map(c => {
+                    const citations = c.chunk_content.match(new RegExp(citeRegex, 'gi')) || [];
+                    return { ...c, citations: [...new Set(citations)] };
+                });
             }
         }
     } catch (err) {
@@ -385,7 +388,10 @@ Return a JSON object with a single key "top_indices" containing an array of inte
     }
 
     // Fallback: return top 3 from filtered search
-    return filteredResults.slice(0, 3);
+    return filteredResults.slice(0, 3).map(c => {
+        const citations = c.chunk_content.match(new RegExp(citeRegex, 'gi')) || [];
+        return { ...c, citations: [...new Set(citations)] };
+    });
 }
 
 // Part 2: The Answer Logic (Generates the response)
