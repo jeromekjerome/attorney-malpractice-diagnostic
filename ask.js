@@ -474,6 +474,8 @@ Constraint: You are providing a diagnostic analysis of case law, not forming an 
 
 7. **Citation Format.** **STRICT REQUIREMENT.** Never mention a case name without its full reporter reference (e.g., *Smith v. Jones*, 123 A.D.3d 456 [1st Dept 2014]). **Only include legal citations that appear in the CONTEXT. Unverified citations or standalone case names without reporters will be automatically stripped.**
 
+8. **Milestone Feedback (Turn ${turnNumber}):** ${turnNumber % 3 === 0 ? "You have reached a milestone in this seminar. Before posing your next question, provide a brief, professional assessment of the student's analytical progress. Highlight their strengths in handling the case law so far and pinpoint the specific doctrinal gaps they still need to bridge. After this assessment, transition to your next focused question." : "Continue the seminar with your next logical question based on the student's last response."}
+
 Tone: Firm, intellectually rigorous, Socratic, but encouraging.`;
     }
 
