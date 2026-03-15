@@ -9,7 +9,8 @@ const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 const CHUNK_SIZE = 1000;
 const CHUNK_OVERLAP = 150;
 
-async function runChunker() {
+export async function runChunker() {
+    console.log('[Chunker] Starting ingestion run...');
     try {
         // 1. Get posts from the main table that aren't in the chunks table yet
         const posts = await sql`
@@ -19,12 +20,14 @@ async function runChunker() {
             LIMIT 20`; // Small batches for safety
 
         if (posts.length === 0) {
-            console.log("✅ All posts have been chunked!");
+            console.log('[Chunker] ✅ All posts are up to date. Nothing to ingest.');
             return;
         }
 
+        console.log(`[Chunker] Found ${posts.length} new post(s) to process.`);
+
         for (const post of posts) {
-            console.log(`Processing: ${post.url}`);
+            console.log(`[Chunker] Processing: ${post.url}`);
             const text = post.blog_post;
             const chunks = [];
 
@@ -37,7 +40,7 @@ async function runChunker() {
             for (const chunkText of chunks) {
                 // 3. Generate embedding for each specific chunk
                 const response = await openai.embeddings.create({
-                    model: "text-embedding-3-small",
+                    model: 'text-embedding-3-small',
                     input: chunkText,
                 });
 
@@ -49,16 +52,22 @@ async function runChunker() {
                     VALUES (${post.url}, ${chunkText}, ${JSON.stringify(vector)})
                 `;
             }
-            console.log(`Successfully created ${chunks.length} chunks for: ${post.url}`);
+            console.log(`[Chunker] ✅ Created ${chunks.length} chunk(s) for: ${post.url}`);
         }
 
-        // Auto-recurse to next batch
-        runChunker();
+        // If there were exactly LIMIT posts, there may be more — recurse.
+        if (posts.length === 20) {
+            console.log('[Chunker] Batch complete. Checking for more...');
+            await runChunker();
+        }
 
     } catch (err) {
-        console.error("Chunking error:", err.message);
-        setTimeout(runChunker, 5000); // Retry on failure
+        console.error('[Chunker] ❌ Error during ingestion:', err.message);
     }
 }
 
-runChunker();
+// Allow running directly: node chunker.js
+import { fileURLToPath } from 'url';
+import { resolve } from 'path';
+const isMain = resolve(fileURLToPath(import.meta.url)) === resolve(process.argv[1]);
+if (isMain) runChunker();
