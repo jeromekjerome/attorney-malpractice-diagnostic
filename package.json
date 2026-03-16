@@ -9,7 +9,9 @@
     "test:fast": "node run-tests.js --concurrency 6",
     "test:resume": "node run-tests.js --resume",
     "test:no-cache": "node run-tests.js --no-cache",
-    "test:dry-run": "node run-tests.js --dry-run"
+    "test:dry-run": "node run-tests.js --dry-run",
+    "mode:test": "node switch-env.js test",
+    "mode:prod": "node switch-env.js prod"
   },
   "dependencies": {
     "@neondatabase/serverless": "^1.0.2",

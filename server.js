@@ -38,7 +38,8 @@ runChunker();
 // ---------------------------------------------------------------------------
 app.post('/api/ask', async (req, res) => {
     try {
-        const { question, messages, mode = 'client', sessionId } = req.body;
+        let { question, messages, mode = 'client', sessionId } = req.body;
+        if (!sessionId) sessionId = 'fallback-' + Date.now();
 
         if (!question && (!messages || messages.length === 0)) {
             return res.status(400).json({ error: 'A question or message history is required.' });
@@ -48,6 +49,7 @@ app.post('/api/ask', async (req, res) => {
         const latestQuestion = input[input.length - 1].content;
 
         // Log the interaction
+        console.log(`[Interaction] ID: ${sessionId} | Mode: ${mode} | Q: ${latestQuestion.substring(0, 50)}...`);
         sql`INSERT INTO user_interactions (question, mode, session_id) VALUES (${latestQuestion}, ${mode}, ${sessionId})`.catch(err => {
             console.error('Failed to log interaction:', err.message);
         });
