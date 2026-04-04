@@ -1,6 +1,7 @@
 import express from 'express';
 import cors from 'cors';
-import cron from 'node-cron';
+import { fileURLToPath } from 'url';
+import { dirname, join } from 'path';
 import { answerUserQuestion, checkViability } from './ask.js';
 import { runChunker } from './chunker.js';
 import { sendNotificationEmail } from './email.js';
@@ -8,6 +9,7 @@ import { neon } from '@neondatabase/serverless';
 import OpenAI from 'openai';
 import 'dotenv/config';
 
+const __dirname = dirname(fileURLToPath(import.meta.url));
 const sql = neon(process.env.DATABASE_URL);
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
@@ -16,22 +18,26 @@ const PORT = process.env.PORT || 3000;
 
 app.use(cors());
 app.use(express.json());
-app.use(express.static('public')); // Serve frontend files
+app.use(express.static(join(__dirname, 'public')));
 
 // ---------------------------------------------------------------------------
-// Scheduled Ingestion — runs nightly at 2:00 AM to pick up new blog posts
-// The chunker is idempotent: it only processes posts not yet in the chunks table
+// Cron endpoint — called nightly by Vercel cron at 2:00 AM ET
+// Protected by CRON_SECRET. The chunker is idempotent.
 // ---------------------------------------------------------------------------
-cron.schedule('0 2 * * *', () => {
-    console.log('[Cron] 🕑 Nightly ingestion job triggered.');
-    runChunker();
-}, {
-    timezone: 'America/New_York'
+app.get('/api/cron', async (req, res) => {
+    const auth = req.headers['authorization'];
+    if (auth !== `Bearer ${process.env.CRON_SECRET}`) {
+        return res.status(401).json({ error: 'Unauthorized' });
+    }
+    try {
+        console.log('[Cron] Nightly ingestion triggered.');
+        await runChunker();
+        res.json({ ok: true });
+    } catch (err) {
+        console.error('[Cron] Error:', err.message);
+        res.status(500).json({ error: err.message });
+    }
 });
-
-// Run once on startup to catch any posts added while the server was offline
-console.log('[Startup] Checking for any un-chunked posts...');
-runChunker();
 
 // ---------------------------------------------------------------------------
 // API Routes
@@ -138,6 +144,8 @@ Return ONLY a JSON object: {"topics": ["Topic 1", "Topic 2", ...]} `;
         res.status(500).json({ error: 'Failed to synthesize topics.' });
     }
 });
+
+app.get('/health', (_req, res) => res.json({ status: 'ok', service: 'malpractice-ai' }));
 
 app.listen(PORT, () => {
     console.log(`\n🚀 Server is running on http://localhost:${PORT}`);
