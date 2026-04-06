@@ -1,25 +1,31 @@
 {
-  "type": "module",
-  "scripts": {
-    "start": "node server.js",
-    "generate-tests": "node generate-tests.js",
-    "test": "node run-tests.js",
-    "test:consultant": "node run-tests.js --mode consultant",
-    "test:professor": "node run-tests.js --mode professor",
-    "test:fast": "node run-tests.js --concurrency 6",
-    "test:resume": "node run-tests.js --resume",
-    "test:no-cache": "node run-tests.js --no-cache",
-    "test:dry-run": "node run-tests.js --dry-run",
-    "mode:test": "node switch-env.js test",
-    "mode:prod": "node switch-env.js prod"
-  },
-  "dependencies": {
-    "@neondatabase/serverless": "^1.0.2",
-    "cors": "^2.8.6",
-    "dotenv": "^17.3.1",
-    "express": "^5.2.1",
-    "node-cron": "^4.2.1",
-    "nodemailer": "^8.0.2",
-    "openai": "^6.27.0"
-  }
+    "type":  "module",
+    "scripts":  {
+                    "start":  "node server.js",
+                    "generate-tests":  "node generate-tests.js",
+                    "test":  "node run-tests.js",
+                    "test:unit":  "node test/index.test.mjs",
+                    "test:consultant":  "node run-tests.js --mode consultant",
+                    "test:professor":  "node run-tests.js --mode professor",
+                    "test:fast":  "node run-tests.js --concurrency 6",
+                    "test:resume":  "node run-tests.js --resume",
+                    "test:no-cache":  "node run-tests.js --no-cache",
+                    "test:dry-run":  "node run-tests.js --dry-run",
+                    "mode:test":  "node switch-env.js test",
+                    "mode:prod":  "node switch-env.js prod",
+                    "test:e2e":  "playwright test",
+                    "test:e2e:headed":  "playwright test --headed"
+                },
+    "dependencies":  {
+                         "@neondatabase/serverless":  "^1.0.2",
+                         "cors":  "^2.8.6",
+                         "dotenv":  "^17.3.1",
+                         "express":  "^5.2.1",
+                         "node-cron":  "^4.2.1",
+                         "nodemailer":  "^8.0.2",
+                         "openai":  "^6.27.0"
+                     },
+    "devDependencies":  {
+                            "@playwright/test":  "^1.59.1"
+                        }
 }
