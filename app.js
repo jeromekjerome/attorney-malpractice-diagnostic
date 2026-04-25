@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
+import { buildModelList, chatCompletionsWithFallback } from './openaiModelFailover.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -25,6 +26,10 @@ export function createApp({
   const app = express();
   let cachedTopics = null;
   let lastTopicUpdate = 0;
+  const topicModels = buildModelList(
+    env.OPENAI_MODEL_AUX || 'gpt-4o-mini',
+    env.OPENAI_MODEL_AUX_FALLBACKS || 'gpt-5.4-mini,gpt-4.1'
+  );
 
   app.use(cors());
   app.use(express.json());
@@ -123,8 +128,8 @@ Based on these, generate 5 concise "Common Study Topics" (4-7 words each) that r
 Avoid conversational snippets like "yes" or "just last week".
 Return ONLY a JSON object: {"topics": ["Topic 1", "Topic 2", ...]} `;
 
-      const response = await openai.chat.completions.create({
-        model: 'gpt-4o-mini',
+      const response = await chatCompletionsWithFallback(openai, {
+        models: topicModels,
         messages: [{ role: 'user', content: synthesisPrompt }],
         response_format: { type: 'json_object' },
       });

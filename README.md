@@ -2,7 +2,7 @@
 
 **A Retrieval-Augmented Generation (RAG) platform to diagnose legal malpractice queries based exclusively on New York case law and Andrew Bluestone's legal blog.**
 
-This application leverages a modernized tech stack combining an optimized serverless vector database (Neon Postgres) with OpenAI's natural language and embedding models (`gpt-4o`, `gpt-4o-mini`, `text-embedding-3-small`). The front end provides a sleek, subscriber-ready interface built entirely with responsive, vanilla HTML/CSS/JS glassmorphism.
+This application leverages a modernized tech stack combining an optimized serverless vector database (Neon Postgres) with OpenAI's natural language and embedding models. Runtime model selection is environment-driven and includes automatic fallback models if a primary model is unavailable or deprecated.
 
 ---
 
@@ -11,11 +11,11 @@ This application leverages a modernized tech stack combining an optimized server
 *   **Frontend**: A responsive Vanilla JS & CSS UI that queries the backend API.
 *   **Backend Server**: A streamlined Node.js (Express) server acting as the bridge between subscribers and the RAG infrastructure.
 *   **Vector Database**: Neon Postgres loaded with `pgvector` to store the thousands of tokenized embeddings of legal blog texts.
-*   **AI Engine**: OpenAI's API.
-    *   **Retrieval**: `text-embedding-3-small` generates 1536-dimensional query vectors and matches them using cosine similarity (`<=>`) in Neon.
-    *   **Re-ranking**: `gpt-4o-mini` re-ranks the top vector results to surface the most citation-rich, legally relevant chunks.
-    *   **Generation**: `gpt-4o` interprets the matched legal excerpts and diagnostically answers the subscriber.
-    *   **Auxiliary tasks** (lead qualification, topic synthesis, citation verification): `gpt-4o-mini`.
+*   **AI Engine**: OpenAI's API with model failover.
+    *   **Retrieval**: Primary embedding model + fallback list generate query vectors for Neon similarity search.
+    *   **Re-ranking**: Primary aux model + fallback list re-rank top vector results.
+    *   **Generation**: Primary answer model + fallback list interpret legal excerpts and generate diagnostics.
+    *   **Auxiliary tasks** (lead qualification, topic synthesis, citation verification): aux model chain with fallback.
 *   **Citation Verification**: CourtListener API (optional) cross-references every legal citation in real time.
 
 ---
@@ -45,7 +45,7 @@ The retrieval pipeline is a multi-stage process:
 
 1. **Vector Search** — Embeds the user's query and retrieves the top 20 candidate chunks from `bluestone_blog_chunks` by cosine similarity.
 2. **Citation Filter** — Filters the 20 candidates down to only those containing complete legal citations (case name + reporter reference). Falls back to raw vector results if none qualify.
-3. **LLM Re-ranking** — Sends the filtered candidates to `gpt-4o-mini`, which selects the **3 most legally relevant** chunks for the user's specific scenario.
+3. **LLM Re-ranking** — Sends the filtered candidates to the configured aux model chain, which selects the **3 most legally relevant** chunks for the user's specific scenario.
 4. **Context Injection** — The top 3 chunks are injected into the system prompt alongside the full conversation history.
 
 ---
@@ -55,7 +55,7 @@ The retrieval pipeline is a multi-stage process:
 When `COURTLISTENER_TOKEN` is configured, every AI response is automatically processed by a live citator pipeline:
 
 *   **Direct Citation Lookup** — Submits the full response text to CourtListener's citation-lookup endpoint. Found citations are annotated with a `[✅ Verified](url)` badge linking to the CourtListener case page. Citations that cannot be verified (HTTP 404) are **automatically stripped** from the response along with their surrounding case name and any orphaned punctuation.
-*   **Orphaned Case Name Repair** — For case names that appear without a reporter citation, the pipeline performs a secondary CourtListener name search. It then uses `gpt-4o-mini` to confirm whether any search result unambiguously matches the mentioned case. If confirmed, the full verified citation is reconstructed and linked. If not, the case name is stripped.
+*   **Orphaned Case Name Repair** — For case names that appear without a reporter citation, the pipeline performs a secondary CourtListener name search. It then uses the configured aux model chain to confirm whether any search result unambiguously matches the mentioned case. If confirmed, the full verified citation is reconstructed and linked. If not, the case name is stripped.
 *   **Forward Citation Profiler** — For each verified citation, the pipeline fetches the most recent opinions that have cited it (using CourtListener's `opinions-cited` API). This data is appended to the response as a **"📡 Recent Precedent Update"** section, showing whether the cited principles have been recently reaffirmed or distinguished.
 
 > If `COURTLISTENER_TOKEN` is not set, citation verification is skipped gracefully and responses are returned as-is.
@@ -66,7 +66,7 @@ When `COURTLISTENER_TOKEN` is configured, every AI response is automatically pro
 
 In `client` mode, every AI response triggers a background viability check:
 
-*   `checkViability()` sends the full conversation history and the AI's analysis to `gpt-4o-mini`, which evaluates whether the user has a prima facie colorable malpractice case (attorney-client relationship, breach, proximate cause, damages) **and** whether enough facts have been provided to justify an intake alert.
+*   `checkViability()` sends the full conversation history and the AI's analysis to the configured aux model chain, which evaluates whether the user has a prima facie colorable malpractice case (attorney-client relationship, breach, proximate cause, damages) **and** whether enough facts have been provided to justify an intake alert.
 *   If both criteria are met, `sendNotificationEmail()` fires a notification to the configured address with the user's question, the AI's diagnostic, and the full conversation history.
 *   **One email per session** — the `lead_email_sent` flag in `user_interactions` prevents duplicate alerts for the same session.
 
@@ -77,7 +77,7 @@ In `client` mode, every AI response triggers a background viability check:
 `GET /api/topics` returns five synthesized "Common Study Topics" derived from recent user queries:
 
 *   Fetches the 40 most recent `client`-mode questions from `user_interactions`.
-*   Sends them to `gpt-4o-mini` which condenses them into 5 high-level topic labels (4–7 words each).
+*   Sends them to the configured aux model chain which condenses them into 5 high-level topic labels (4–7 words each).
 *   Results are **cached for 15 minutes** to reduce API costs.
 *   Falls back to a static default list if fewer than 3 queries exist in the database.
 
@@ -106,6 +106,17 @@ DATABASE_URL=postgres://your_neon_user:your_neon_password@ep-your-database-id.us
 
 # OpenAI API key
 OPENAI_API_KEY=sk-proj-your-actual-api-key-here...
+# Answer model chain (primary + comma-separated fallbacks)
+OPENAI_MODEL_ANSWER=gpt-4o
+OPENAI_MODEL_ANSWER_FALLBACKS=gpt-5.4-mini,gpt-4.1
+
+# Auxiliary model chain (reranking, viability, topic synthesis, citation repair)
+OPENAI_MODEL_AUX=gpt-4o-mini
+OPENAI_MODEL_AUX_FALLBACKS=gpt-5.4-mini,gpt-4.1
+
+# Embedding model chain
+OPENAI_MODEL_EMBEDDING=text-embedding-3-small
+OPENAI_MODEL_EMBEDDING_FALLBACKS=text-embedding-3-large
 
 # CourtListener API token (optional — enables live citation verification)
 COURTLISTENER_TOKEN=your-courtlistener-token

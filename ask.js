@@ -1,10 +1,27 @@
 import 'dotenv/config';
 import { neon } from '@neondatabase/serverless';
 import OpenAI from 'openai';
+import {
+    buildModelList,
+    chatCompletionsWithFallback,
+    embeddingsWithFallback
+} from './openaiModelFailover.js';
 
 const sql = neon(process.env.DATABASE_URL);
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 const COURTLISTENER_TOKEN = process.env.COURTLISTENER_TOKEN;
+const ANSWER_MODELS = buildModelList(
+    process.env.OPENAI_MODEL_ANSWER || 'gpt-4o',
+    process.env.OPENAI_MODEL_ANSWER_FALLBACKS || 'gpt-5.4-mini,gpt-4.1'
+);
+const AUX_MODELS = buildModelList(
+    process.env.OPENAI_MODEL_AUX || 'gpt-4o-mini',
+    process.env.OPENAI_MODEL_AUX_FALLBACKS || 'gpt-5.4-mini,gpt-4.1'
+);
+const EMBEDDING_MODELS = buildModelList(
+    process.env.OPENAI_MODEL_EMBEDDING || 'text-embedding-3-small',
+    process.env.OPENAI_MODEL_EMBEDDING_FALLBACKS || 'text-embedding-3-large'
+);
 
 // Part 0: Live Citator (Shepardizing via CourtListener)
 async function shepardizeCitations(text) {
@@ -146,8 +163,8 @@ ${candidates.map((c, idx) => `${idx + 1}. ${c.case_name} (${c.citation?.[0] || '
 Does any of these results UNAMBIGUOUSLY match the case mentioned in the snippet? 
 Respond ONLY with a JSON object: {"match_found": true, "index": 0} (where index is 0, 1, or 2) or {"match_found": false}.`;
 
-                            const evalResponse = await openai.chat.completions.create({
-                                model: "gpt-4o-mini",
+                            const evalResponse = await chatCompletionsWithFallback(openai, {
+                                models: AUX_MODELS,
                                 messages: [{ role: "system", content: "You are a precise legal research assistant." }, { role: "user", content: verificationPrompt }],
                                 response_format: { type: "json_object" }
                             });
@@ -317,8 +334,8 @@ async function forwardCiteProfile(citations) {
 // Part 1: The Retrieval Logic (Finds the best chunks)
 async function getLegalContext(userQuery) {
     // 1. Fast Vector Search for Top 20 Candidates
-    const embeddingResponse = await openai.embeddings.create({
-        model: "text-embedding-3-small",
+    const embeddingResponse = await embeddingsWithFallback(openai, {
+        models: EMBEDDING_MODELS,
         input: userQuery,
     });
     const queryVector = embeddingResponse.data[0].embedding;
@@ -361,8 +378,8 @@ ${filteredResults.map((c, i) => `--- [ID: ${i}] ---\n${c.chunk_content}`).join("
 Return a JSON object with a single key "top_indices" containing an array of integers representing the IDs of the 3 most relevant chunks, ordered from most to least relevant. Example: {"top_indices": [2, 0, 4]}`;
 
     try {
-        const rerankResponse = await openai.chat.completions.create({
-            model: "gpt-4o-mini",
+        const rerankResponse = await chatCompletionsWithFallback(openai, {
+            models: AUX_MODELS,
             messages: [{ role: "user", content: prompt }],
             response_format: { type: "json_object" }
         });
@@ -485,8 +502,8 @@ Tone: Firm, intellectually rigorous, Socratic, but encouraging.`;
         content: `CONTEXT:\n${contextText}\n\nUSER'S LATEST MESSAGE: ${latestUserMessage}`
     });
 
-    const response = await openai.chat.completions.create({
-        model: "gpt-4o",
+    const response = await chatCompletionsWithFallback(openai, {
+        models: ANSWER_MODELS,
         messages: apiMessages
     });
 
@@ -572,8 +589,8 @@ Return ONLY a JSON object: {
 }`;
 
     try {
-        const resp = await openai.chat.completions.create({
-            model: 'gpt-4o-mini',
+        const resp = await chatCompletionsWithFallback(openai, {
+            models: AUX_MODELS,
             messages: [{ role: 'user', content: prompt }],
             response_format: { type: 'json_object' },
             temperature: 0
