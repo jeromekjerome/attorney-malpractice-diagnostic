@@ -19,19 +19,11 @@ function buildHealthShape(models, active) {
 
 function isMissingOrDeprecatedModelError(error) {
   const status = error?.status;
-  const code = error?.code || error?.error?.code || '';
-  const message = String(error?.message || '').toLowerCase();
+  const code = String(error?.code || error?.error?.code || '').toLowerCase();
 
   if (status === 404 || status === 410) return true;
-  if (String(code).toLowerCase().includes('model')) return true;
 
-  return (
-    message.includes('model') &&
-    (message.includes('not found') ||
-      message.includes('does not exist') ||
-      message.includes('deprecated') ||
-      message.includes('deprecat'))
-  );
+  return code === 'model_not_found' || code === 'deprecated_model';
 }
 
 function isTransientError(error) {
